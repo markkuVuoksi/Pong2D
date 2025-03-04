@@ -3,10 +3,51 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     public float speed = 5f;
+    public float boundaryX = 9f; // Adjust this value based on your game view boundaries
+    public float rotationSpeed = 200f; // Speed of the ball's rotation
+    public GameManager gameManager; // Reference to the GameManager
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        ResetBall();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        CheckOutOfBounds();
+        RotateBall();
+    }
+
+    // Check if the ball is out of bounds
+    void CheckOutOfBounds()
+    {
+        if (Mathf.Abs(transform.position.x) > boundaryX)
+        {
+            if (transform.position.x > boundaryX)
+            {
+                gameManager.AddScorePaddle1();
+            }
+            else if (transform.position.x < -boundaryX)
+            {
+                gameManager.AddScorePaddle2();
+            }
+            ResetBall();
+        }
+    }
+
+    // Rotate the ball
+    void RotateBall()
+    {
+        transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+    }
+
+    // Reset the ball to the origin with a new random direction
+    void ResetBall()
+    {
+        transform.position = Vector2.zero;
+
         // Generate a random direction
         float randomDirectionX = Random.Range(-1f, 1f);
         float randomDirectionY = Random.Range(-1f, 1f);
@@ -14,23 +55,5 @@ public class Ball : MonoBehaviour
 
         // Set the ball's velocity
         GetComponent<Rigidbody2D>().linearVelocity = randomDirection * speed;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    // Called when the ball collides with another object
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        // Check if the collision is with a wall
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            // Reflect the ball's velocity based on the collision normal
-            Vector2 reflectDirection = Vector2.Reflect(GetComponent<Rigidbody2D>().linearVelocity, collision.contacts[0].normal);
-            GetComponent<Rigidbody2D>().linearVelocity = reflectDirection.normalized * speed;
-        }
     }
 }
